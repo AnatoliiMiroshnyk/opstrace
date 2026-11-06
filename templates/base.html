@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c2e">
+  <title>{% block title %}OpsTrace{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'dashboard' %}"><span class="brand-mark">O</span><span>OpsTrace</span></a>
+    {% if request.user.is_authenticated %}
+      <nav class="main-nav" aria-label="Головна навігація">
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Огляд</a>
+        <a href="{% url 'operations:items' %}">Завдання</a>
+        <a href="{% url 'operations:routines' %}">Регламенти</a>
+        {% if current_membership.role == 'owner' or current_membership.role == 'admin' %}<a href="{% url 'workspaces:team' %}">Команда</a>{% endif %}
+      </nav>
+      <div class="topbar-user">
+        {% if available_memberships and available_memberships|length > 1 %}
+          <form method="post" action="{% url 'workspaces:switch' %}" class="workspace-switch">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label class="sr-only" for="workspace-select">Робочий простір</label>
+            <select id="workspace-select" name="workspace_id" onchange="this.form.submit()">
+              {% for membership in available_memberships %}
+                <option value="{{ membership.workspace_id }}" {% if current_workspace.pk == membership.workspace_id %}selected{% endif %}>{{ membership.workspace.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        {% elif current_workspace %}
+          <span class="workspace-name">{{ current_workspace.name }}</span>
+        {% endif %}
+        <span class="user-email">{{ request.user.get_full_name|default:request.user.email }}</span>
+        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="link-button" type="submit">Вийти</button></form>
+      </div>
+    {% else %}
+      <nav class="main-nav auth-nav"><a href="{% url 'accounts:login' %}">Увійти</a><a class="nav-cta" href="{% url 'accounts:register' %}">Створити простір</a></nav>
+    {% endif %}
+  </header>
+
+  <main class="page-shell">
+    {% if messages %}
+      <div class="messages" aria-live="polite">
+        {% for message in messages %}<div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer"><span>OpsTrace</span><span>Виконання, яке можна перевірити.</span></footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

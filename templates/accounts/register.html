@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Створення простору · OpsTrace{% endblock %}
+{% block content %}
+<section class="auth-layout register-layout">
+  <div class="auth-copy"><p class="eyebrow">ПОЧНІТЬ З ПОРЯДКУ</p><h1>Регулярна робота. Видимий результат.</h1><p>Створіть робочий простір. Ви автоматично отримаєте роль власника та зможете налаштувати перші регламенти.</p><div class="mini-feature"><span>01</span><div><strong>Створіть регламент</strong><small>Визначте періодичність і відповідального.</small></div></div><div class="mini-feature"><span>02</span><div><strong>Зберіть підтвердження</strong><small>Додайте документ або фотографію.</small></div></div><div class="mini-feature"><span>03</span><div><strong>Перевірте результат</strong><small>Збережіть рішення та історію.</small></div></div></div>
+  <div class="panel auth-panel">
+    <h2>Новий робочий простір</h2>
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <button class="button button-primary button-block" type="submit">Створити простір</button>
+    </form>
+    <p class="form-footnote">Вже зареєстровані? <a href="{% url 'accounts:login' %}">Увійти</a>.</p>
+  </div>
+</section>
+{% endblock %}
